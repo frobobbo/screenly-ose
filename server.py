@@ -19,6 +19,7 @@ import json
 import os
 import traceback
 import uuid
+import bottle
 
 from bottle import route, run, request, error, static_file, response
 from bottle import HTTPResponse
@@ -94,6 +95,11 @@ def template(template_name, **context):
 
     return haml_template(template_name, **context)
 
+def check_auth(user, passwd):
+    if user == 'admin':
+        return True
+    else:
+        return False
 
 ################################
 # Model
@@ -261,11 +267,13 @@ def playlist_order():
 
 
 @route('/')
+@bottle.auth_basic(check_auth)
 def viewIndex():
     return template('index')
 
 
 @route('/settings', method=["GET", "POST"])
+@bottle.auth_basic(check_auth)
 def settings_page():
 
     context = {'flash': None}
@@ -290,6 +298,7 @@ def settings_page():
 
 
 @route('/system_info')
+@bottle.auth_basic(check_auth)
 def system_info():
     viewer_log_file = '/tmp/screenly_viewer.log'
     if path.exists(viewer_log_file):
