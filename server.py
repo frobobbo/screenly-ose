@@ -36,6 +36,8 @@ from utils import url_fails
 from utils import get_video_duration
 
 from settings import settings, DEFAULTS
+
+import suds
 ################################
 # Utilities
 ################################
@@ -96,10 +98,16 @@ def template(template_name, **context):
     return haml_template(template_name, **context)
 
 def check_auth(user, passwd):
-    if user == 'admin':
-        return True
-    else:
-        return False
+   url = "https://<URL>/User.asmx?WSDL"
+   client = suds.client.Client(url)
+   if client.service.AuthenticateUser(user, passwd):
+      if client.service.AuthenticateUserToGroup(user, "LobbyTVAdmins"):
+         return True
+      else:
+         return False
+   else:
+      return False
+
 
 ################################
 # Model
