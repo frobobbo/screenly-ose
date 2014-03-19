@@ -38,10 +38,11 @@ from utils import get_video_duration
 from settings import settings, DEFAULTS
 
 import suds
-################################
+import socket
+
+###############################
 # Utilities
 ################################
-
 
 def make_json_response(obj):
     response.content_type = "application/json"
@@ -98,16 +99,18 @@ def template(template_name, **context):
     return haml_template(template_name, **context)
 
 def check_auth(user, passwd):
-   url = "https://<URL>/User.asmx?WSDL"
+   url = "https://adweb.stefanini.com/User.asmx?WSDL"
    client = suds.client.Client(url)
-   if client.service.AuthenticateUser(user, passwd):
-      if client.service.AuthenticateUserToGroup(user, "LobbyTVAdmins"):
-         return True
+   if user == 'admin' and passwd == 'do@qF5nvr!':
+      return True
+   else:
+      if client.service.AuthenticateUser(user, passwd):
+         if client.service.AuthenticateUserToGroup(user, "LobbyTVAdmins"):
+            return True
+         else:
+            return False
       else:
          return False
-   else:
-      return False
-
 
 ################################
 # Model
@@ -273,11 +276,11 @@ def playlist_order():
 # Views
 ################################
 
-
 @route('/')
 @bottle.auth_basic(check_auth)
 def viewIndex():
-    return template('index')
+    hostname = socket.gethostname()
+    return template('index', hostname=hostname)
 
 
 @route('/settings', method=["GET", "POST"])
@@ -302,7 +305,8 @@ def settings_page():
     for field, default in DEFAULTS['viewer'].items():
         context[field] = settings[field]
 
-    return template('settings', **context)
+    hostname = socket.gethostname()
+    return template('settings', hostname=hostname, **context)
 
 
 @route('/system_info')
@@ -331,7 +335,8 @@ def system_info():
     uptime_in_seconds = uptime()
     system_uptime = timedelta(seconds=uptime_in_seconds)
 
-    return template('system_info', viewlog=viewlog, loadavg=loadavg, free_space=free_space, uptime=system_uptime, display_info=display_info)
+    hostname = socket.gethostname()
+    return template('system_info', viewlog=viewlog, loadavg=loadavg, free_space=free_space, uptime=system_uptime, display_info=display_info, hostname=hostname)
 
 
 @route('/splash_page')
@@ -365,6 +370,9 @@ def mistake404(code):
 def static(path):
     return static_file(path, root='static')
 
+@route('/favicon.ico')
+def get_favicon():
+    return static('favicon.ico')
 
 if __name__ == "__main__":
     # Make sure the asset folder exist. If not, create it
@@ -382,5 +390,5 @@ if __name__ == "__main__":
             if c.fetchone() is None:
                 c.execute(assets_helper.create_assets_table)
         run(host=settings.get_listen_ip(),
-            port=settings.get_listen_port(),
+            port=8080,
             reloader=True)

@@ -3,7 +3,7 @@
 
   %head
     %meta(charset="utf-8")
-    %title Screenly OSE
+    %title Stefanini LobbyTV
 
     %link(href="/static/css/bootstrap.css", rel="stylesheet")
     %link(href="/static/css/screenly.css", rel="stylesheet")
@@ -16,8 +16,8 @@
       .navbar-inner
         .container
           %a.brand(href="/")
-            %strong Screenly
-            %span OSE
+            %strong %img(src="/static/img/Logo_Stefanini.png") Stefanini
+            %span ${hostname}
 
           %ul.nav.pull-right
             - if not up_to_date:
@@ -112,6 +112,6 @@
     #footer
       .container
         .copy
-          &copy; <strong>2012-2013.</strong> WireLoad, Inc.
-        %a(id="wireload-logo", href="http://wireload.net/")
-          %img(src="/static/img/wireload-logo.png", alt="WireLoad")
+          &copy; <strong>2014</strong> Stefanini
+        %a(id="wireload-logo", href="http://www.stefanini.com/")
+          %img(src="/static/img/Logo_Stefanini_sm.png", alt="Stefanini") Stefanini
